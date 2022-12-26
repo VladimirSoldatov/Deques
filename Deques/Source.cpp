@@ -4,11 +4,10 @@
 
 using namespace std;
 
-bool is_validId_mail(string text)
+bool is_valid_email_id(string str)
 {
-	static const auto r = regex(R"("\w+@\w+\.(?:com|ru))");
-	return regex_match(text.c_str(), r);
-	
+	static const regex r(R"(\w+@\w+\.(?:com|in))");
+	return regex_match(str.data(), r);
 }
 string trim(string text) {
 	static const auto r = regex(R"(\s+)");
@@ -36,7 +35,7 @@ int main()
 	if (start != ends)
 		cout << "Deque is full\n";
 */
-	if (is_validId_mail("cbb@rambler.com"))
+	if (is_valid_email_id("cbb@rambler.com"))
 		cout << "OK\n";
 	else
 		cout << "No Good\n";
