@@ -1,5 +1,5 @@
 #include<iostream>
-#include<deque>
+#include<string>
 #include<regex>
 #include"windows.h"
 
@@ -32,8 +32,24 @@ void anonimus(string &text)
 }
 void DeAnonimus(string& text, string name)
 {
-	regex r(R"(\{[F]\.[I]\.[O]\.\})");
+	regex a("[А-ЯЁа-яё]+(?:ова|ина|ева|ына)\\s[А-Я]\\.[А-Я]\\.");
+	regex vn("[А-ЯЁа-яё]+(?:ов|ин|ев|ын)\\s[А-Я]\\.[А-Я]\\.");
+	regex ss("[А-ЯЁа-яё]+[ь]\\s[А-Я]\\.[А-Я]\\.");
+	regex x("[А-ЯЁа-яё]+[а]\\s[А-Я]\\.[А-Я]\\.");
+	string old_name = name;
+	if (regex_match(name.c_str(), a))
+		name = name.replace(name.length() - 6, 1, "ой");
+	else if (regex_match(name.c_str(), vn))
+		name = name.replace(name.length() - 5,1, "а ");
+	else if (regex_match(name.c_str(), ss))
+		name = name.replace(name.length() - 6, 1, "я");
+	else if (regex_match(name.c_str(), x))
+		name = name.replace(name.length() - 6, 1, "ы");
+	
+	regex r(R"([F][I][O][r][p])");
 	text = regex_replace(text.data(), r, name);
+	regex r_old(R"([F][I][O])");
+	text = regex_replace(text.data(), r_old, old_name);
 }
 bool isBirth(string str)
 {
@@ -43,7 +59,7 @@ bool isBirth(string str)
 bool isLabel(string str)
 {
 	regex r("[B-Z][a-z]{3,7}[0-9]{1,4}");
-	return regex_match(str.data(), r);
+	return regex_match(str.c_str(), r);
 }
 bool isBig(string text)
 {
@@ -82,10 +98,10 @@ int main()
 	string otstup2 = "\t\t\t\t";
 	string shapka = otstup + string("Директору ООО \"Рога и копыта\"\n")
 		+ otstup + string("Иванову И.И.\n")
-		+ otstup + string("от {F.I.O.}\n")
+		+ otstup + string("от FIOrp\n")
 		+ otstup2 + string("Заявление\n\n")
 		+ string("Прошу предоставить мне отпуск с {begin_date} по {end_date}.\n\n")
-		+ string("{cur_date}") + string(otstup) + string{ "{F.I.O.}\n" };
+		+ string("{cur_date}") + string(otstup) + string{ "FIO\n" };
 	cout << shapka;
 	string fio = "{F.I.O.}";
 	string name;
