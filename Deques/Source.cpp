@@ -46,9 +46,9 @@ void DeAnonimus(string& text, string name)
 	else if (regex_match(name.c_str(), x))
 		name = name.replace(name.length() - 6, 1, "û");
 	
-	regex r(R"([F][I][O][r][p])");
+	regex r(R"((FIOrp))");
 	text = regex_replace(text.data(), r, name);
-	regex r_old(R"([F][I][O])");
+	regex r_old(R"(FIO)");
 	text = regex_replace(text.data(), r_old, old_name);
 }
 bool isBirth(string str)
@@ -147,5 +147,34 @@ int main()
 	else
 		cout << "No Good\n";
 	*/
+
+	const auto input_f = "please split,this,csv, ,line,\\,\n"s;
+	const regex re{ "((?:[^\\\\,]|\\\\.)+)(?:,|$)" };
+	const vector<string> m_vecFields{ sregex_token_iterator(cbegin(input_f), cend(input_f), re, 1), sregex_token_iterator() };
+
+	cout << input_f << endl;
+
+	copy(cbegin(m_vecFields), cend(m_vecFields), ostream_iterator<string>(cout, "\n"));
+
+	const string input = "ABC:1->   PQR:2;;;   XYZ:3<<<";
+	const regex r(R"((\w+):(\d))");
+	// Note: vector<string> here, unlike vector<smatch> as in std::regex_iterator
+	const vector<string> full_match{
+		sregex_token_iterator{input.begin(), input.end(), r, 0}, // Mark `0` here i.e. whole regex match
+		sregex_token_iterator{}
+	};
+	
+
+	const vector<string> cptr_grp_1st{
+		sregex_token_iterator{input.begin(), input.end(), r, 1}, // Mark `1` here i.e. 1st capture group
+		sregex_token_iterator{}
+	};
+	
+
+	const vector<string> cptr_grp_2nd{
+		sregex_token_iterator{input.begin(), input.end(), r, 2}, // Mark `2` here i.e. 2nd capture group
+		sregex_token_iterator{}
+	};
+	
 	return 0;
 }
