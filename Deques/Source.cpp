@@ -2,8 +2,11 @@
 #include<string>
 #include<regex>
 #include"windows.h"
+#include<fstream>
+#include<filesystem>
 
 using namespace std;
+namespace fs = filesystem;
 //в строке были только латинские буквы от a до e, цифры 0 до 4ж
 bool is_valid_email_id(string str)
 {
@@ -46,9 +49,9 @@ void DeAnonimus(string& text, string name)
 	else if (regex_match(name.c_str(), x))
 		name = name.replace(name.length() - 6, 1, "ы");
 	
-	regex r(R"((FIOrp))");
+	regex r(R"(\{(FIOrp)\})");
 	text = regex_replace(text.data(), r, name);
-	regex r_old(R"(FIO)");
+	regex r_old(R"(\{(FIO)\})");
 	text = regex_replace(text.data(), r_old, old_name);
 }
 bool isBirth(string str)
@@ -71,9 +74,47 @@ void set_date(string& date, string _date, string user_date)
 
 	int position;
 	position = date.find(_date);
+	if(!user_date.empty())
 	date.replace(position, _date.length(), user_date.c_str());
 }
+void read_temlate(vector<string> &nouns, string &shapka, string path)
+{
+	fstream file;
+	string buff;
+	
+	file.open(path);
+	while (!file.eof())
+	{
+		getline(file, buff);
+		if (buff == "" || buff.at(0) == '$')
+			continue;
+		if (buff.at(0)=='{')
+			nouns.push_back(buff);
+		else
+		{
+			shapka.append(buff);
+			shapka.append("\r\n");
+		}
+	}
 
+}
+void get_name_of_template()
+{
+	fs::path current_path = fs::current_path();
+	vector<string> paths;
+	for (auto item : fs::directory_iterator(current_path))
+	{
+		if (item.is_regular_file() && item.path().extension().string() == ".txt")
+			paths.push_back(item.path().string());
+	}
+	string template_name;
+	fstream get_name(paths[0].c_str());
+	getline(get_name, template_name);
+	if (template_name.at(0) == '$')
+		template_name = template_name.substr(1, template_name.length() - 1);
+	else
+		cout << "Не верный шаблон\n";
+}
 int main()
 {
 	SetConsoleCP(1251);
@@ -94,22 +135,34 @@ int main()
 	string FIO = "Солдатов В.В. вышел на улице и сказал...\n";
 	anonimus(FIO);
 	cout << FIO;
+
+	/*
 	string otstup = "\t\t\t\t\t\t\t";
 	string otstup2 = "\t\t\t\t";
 	string shapka = otstup + string("Директору ООО \"Рога и копыта\"\n")
 		+ otstup + string("Иванову И.И.\n")
-		+ otstup + string("от FIOrp\n")
+		+ otstup + string("от {FIOrp}\n")
 		+ otstup2 + string("Заявление\n\n")
 		+ string("Прошу предоставить мне отпуск с {begin_date} по {end_date}.\n\n")
-		+ string("{cur_date}") + string(otstup) + string{ "FIO\n" };
+		+ string("{cur_date}") + string(otstup) + string{ "{FIO}\n" };
+	*/
+	get_name_of_template();
+	string shapka;
+	vector<string> nouns;
+	string path = "template_holiday.txt";
+	read_temlate(nouns, shapka,path );
 	cout << shapka;
-	string fio = "{F.I.O.}";
+	/*fstream infile;
+	infile.open("template_holiday.txt",ios::app);
+	if (infile.is_open())
+		cout << "Файл открыт\n";
+	infile.write(shapka.c_str(), shapka.length());
+	infile.close();*/
 	string name;
 	string date;
 	cout << "Введите имя: ";
 	getline(cin,name);
 	DeAnonimus(shapka, name);
-	//cout << fio << "\n";
 	cout << "Введите дату начала отпуска ";
 	getline(cin, date);
 	set_date(shapka, "{begin_date}", date);
@@ -176,5 +229,6 @@ int main()
 		sregex_token_iterator{}
 	};
 	
+
 	return 0;
 }
